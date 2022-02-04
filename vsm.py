@@ -14,6 +14,10 @@ import utils
 __author__ = "Christopher Potts"
 __version__ = "CS224u, Stanford, Spring 2021"
 
+if torch.cuda.is_available():
+    device = torch.device('cuda')
+else:
+    device = torch.device('cpu')
 
 def euclidean(u, v):
     return scipy.spatial.distance.euclidean(u, v)
@@ -327,10 +331,10 @@ def hf_encode(text, tokenizer, add_special_tokens=False):
     encoding = tokenizer.encode(
         text,
         add_special_tokens=add_special_tokens,
-        return_tensors='pt')
+        return_tensors='pt').to(device)
     if encoding.shape[1] == 0:
         text = tokenizer.unk_token
-        encoding = torch.tensor([[tokenizer.vocab[text]]])
+        encoding = torch.tensor([[tokenizer.vocab[text]]]).to(device)
     return encoding
 
 

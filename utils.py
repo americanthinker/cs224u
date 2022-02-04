@@ -370,7 +370,50 @@ def fix_random_seeds(
         else:
             set_tf_seed(seed)
 
+def devdf_generator(df, scoring=str) -> pd.DataFrame:
+    '''
+    Removes repeated pairs with distinct scores from dev_df based on scoring removal string.
+    '''
+    repeats = df.groupby(['word1', 'word2']).apply(lambda x: x.score.var())
+    repeats = repeats[repeats > 0].sort_values(ascending=False)
+    repeats.name = 'score variance'
+    repeat_list = repeats.index.tolist()
+    
+    def repeat_words(first_word, second_word):
+        return df[(df['word1']==first_word)&(df['word2']==second_word)]
 
+    temp_df = df.copy()
+    for pair in repeat_list:
+        repeat = repeat_words(pair[0], pair[1])
+        if scoring == 'highest':
+            while len(repeat.index) > 1:
+                min_score = repeat.score.min()
+                index = repeat[repeat.score == min_score].index.values[0]
+                temp_df.drop(index=index, axis=0, inplace=True)
+                repeat.drop(index=index, axis=0, inplace=True)
+        elif scoring == 'lowest':
+            while len(repeat.index) > 1:
+                max_score = repeat.score.max()
+                index = repeat[repeat.score == max_score].index.values[0]
+                temp_df.drop(index=index, axis=0, inplace=True)
+                repeat.drop(index=index, axis=0, inplace=True)
+        elif scoring == 'mean':
+                mean_score = repeat.score.mean()
+                index = repeat.index[0]
+                drops = repeat.index[1:]
+                temp_df.loc[index, 'score'] = mean_score
+                temp_df.drop(index=drops, axis=0, inplace=True)
+                
+    #check to see that variant pairs are dropped
+    repeats = temp_df.groupby(['word1', 'word2']).apply(lambda x: x.score.var())
+    repeats = repeats[repeats > 0.06].sort_values(ascending=False)
+    repeats.name = 'score variance'
+    answer = repeats[repeats > 0].sort_values(ascending=False)
+    print(answer)
+    
+    return temp_df
+
+            
 class DenseTransformer(TransformerMixin):
     """
     From
@@ -392,3 +435,5 @@ class DenseTransformer(TransformerMixin):
     def fit_transform(self, X, y=None, **fit_params):
         self.fit(X, y, **fit_params)
         return self.transform(X)
+
+
