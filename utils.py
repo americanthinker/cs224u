@@ -385,31 +385,35 @@ def devdf_generator(df, scoring=str) -> pd.DataFrame:
     temp_df = df.copy()
     for pair in repeat_list:
         repeat = repeat_words(pair[0], pair[1])
+        
         if scoring == 'highest':
             while len(repeat.index) > 1:
                 min_score = repeat.score.min()
                 index = repeat[repeat.score == min_score].index.values[0]
-                temp_df.drop(index=index, axis=0, inplace=True)
-                repeat.drop(index=index, axis=0, inplace=True)
+                temp_df = temp_df.drop(index=index, axis=0)
+                repeat = repeat.drop(index=index, axis=0)
+                
         elif scoring == 'lowest':
             while len(repeat.index) > 1:
                 max_score = repeat.score.max()
                 index = repeat[repeat.score == max_score].index.values[0]
-                temp_df.drop(index=index, axis=0, inplace=True)
-                repeat.drop(index=index, axis=0, inplace=True)
+                temp_df = temp_df.drop(index=index, axis=0)
+                repeat = repeat.drop(index=index, axis=0)
+                
         elif scoring == 'mean':
                 mean_score = repeat.score.mean()
                 index = repeat.index[0]
                 drops = repeat.index[1:]
                 temp_df.loc[index, 'score'] = mean_score
-                temp_df.drop(index=drops, axis=0, inplace=True)
+                temp_df = temp_df.drop(index=drops, axis=0)
                 
     #check to see that variant pairs are dropped
     repeats = temp_df.groupby(['word1', 'word2']).apply(lambda x: x.score.var())
     repeats = repeats[repeats > 0.06].sort_values(ascending=False)
     repeats.name = 'score variance'
     answer = repeats[repeats > 0].sort_values(ascending=False)
-    print(answer)
+    if len(answer) < 1:
+        print('All problematic word pairs are removed')
     
     return temp_df
 
