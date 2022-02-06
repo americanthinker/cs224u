@@ -331,10 +331,10 @@ def hf_encode(text, tokenizer, add_special_tokens=False):
     encoding = tokenizer.encode(
         text,
         add_special_tokens=add_special_tokens,
-        return_tensors='pt').to(device)
+        return_tensors='pt')
     if encoding.shape[1] == 0:
         text = tokenizer.unk_token
-        encoding = torch.tensor([[tokenizer.vocab[text]]]).to(device)
+        encoding = torch.tensor([[tokenizer.vocab[text]]])
     return encoding
 
 
