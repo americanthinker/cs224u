@@ -10,6 +10,7 @@ from sklearn.metrics import f1_score
 from sklearn.model_selection import GridSearchCV, StratifiedShuffleSplit
 import sys
 import os
+import time
 
 __author__ = "Christopher Potts"
 __version__ = "CS224u, Stanford, Spring 2021"
@@ -369,7 +370,6 @@ def fix_random_seeds(
             pass
         else:
             set_tf_seed(seed)
-
 def devdf_generator(df, scoring=str) -> pd.DataFrame:
     '''
     Removes repeated pairs with distinct scores from dev_df based on scoring removal string.
@@ -417,7 +417,7 @@ def devdf_generator(df, scoring=str) -> pd.DataFrame:
     
     return temp_df
 
-            
+
 class DenseTransformer(TransformerMixin):
     """
     From
@@ -439,5 +439,6 @@ class DenseTransformer(TransformerMixin):
     def fit_transform(self, X, y=None, **fit_params):
         self.fit(X, y, **fit_params)
         return self.transform(X)
+
 
 

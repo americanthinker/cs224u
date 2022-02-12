@@ -274,7 +274,7 @@ def lsa(df, k=100):
     return pd.DataFrame(trunc, index=df.index)
 
 
-def hf_represent(batch_ids, model, layer=-1):
+def hf_represent(batch_ids, model, device=None, layer=-1):
     """
     Encode a batch of sequences of ids using a Hugging Face
     Transformer-based model `model`. The model's `forward` method is
